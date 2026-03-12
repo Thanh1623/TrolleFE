@@ -1,11 +1,11 @@
-import { HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ModeToggle } from "@/components/mode-toggle";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ROUTES } from "@/routes/route-constants";
+import { HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,24 +30,9 @@ function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-screen flex items-center justify-center bg-[#F4F5F7] dark:bg-background relative overflow-hidden">
+    <div>
       {/* Atlassian background shapes */}
-
-      <img
-        src="https://aid-frontend.prod.atl-paas.net/atlassian-id/front-end/5.0.519/static/media/left.2c8d1b3c.svg"
-        className="absolute left-0 bottom-0 w-[350px] opacity-60 pointer-events-none"
-      />
-
-      <img
-        src="https://aid-frontend.prod.atl-paas.net/atlassian-id/front-end/5.0.519/static/media/right.3c0d9e07.svg"
-        className="absolute right-0 top-0 w-[350px] opacity-60 pointer-events-none"
-      />
-
-      <div className="absolute top-4 right-4">
-        <ModeToggle />
-      </div>
-
-      <div className="w-full max-w-[400px] bg-card border border-border rounded-lg shadow-md p-8 space-y-6 z-10">
+      <div className="w-full min-w-[400px] bg-card border border-border rounded-lg shadow-md p-8 space-y-6 z-10">
         {/* Logo */}
 
         <div className="flex justify-center gap-2 items-center">
@@ -155,7 +140,7 @@ function LoginPage() {
 
           <span className="text-muted-foreground">•</span>
 
-          <Link to="#" className="text-[#0C66E4] hover:underline">
+          <Link to={ROUTES.REGISTER} className="text-[#0C66E4] hover:underline">
             Create an account
           </Link>
         </div>
