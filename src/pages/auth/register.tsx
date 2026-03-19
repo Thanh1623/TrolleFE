@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { useRegister } from "@/modules/register";
+import { toast } from "sonner";
 
 export function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +18,8 @@ export function RegisterPage() {
 
   const [loading, setLoading] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+
+  const { mutateAsync: registerUser } = useRegister();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,9 +40,15 @@ export function RegisterPage() {
     }
 
     setLoading(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
+    try {
+      await registerUser({
+        email: formData.email,
+        password: formData.password,
+      });
+      toast.success("Account created successfully! Please log in.");
+    } catch (error) {
+      console.error("Error registering user:", error);
+    }
     setLoading(false);
   };
 
