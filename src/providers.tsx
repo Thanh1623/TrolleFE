@@ -1,36 +1,51 @@
-import { createContext, Dispatch, SetStateAction, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
+import { axiosService } from "./services/axios";
 
-export interface user {
-  name: string;
-  email: string;
+export interface User {
+  userId: string;
+  email?: string;
+  name?: string;
 }
 
-export type AppProviderType = {
-  user: user;
-  setUser: Dispatch<SetStateAction<user>>;
-  Login: (user: user) => void;
-};
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext<AuthContextType | null>(null);
 
-const AppContext = createContext<AppProviderType | undefined>(undefined);
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-function AppProvider({ children }) {
-  const [user, setUser] = useState<user>(
-    localStorage.getItem("user")
-      ? JSON.parse(localStorage.getItem("user")!)
-      : null,
-  );
-
-  if (!AppContext) {
-    throw new Error("useApp must be used within a AppProvider");
-  }
-  const Login = (user: user) => {
-    localStorage.setItem("user", JSON.stringify(user));
-    setUser(user);
+  const fetchMe = async () => {
+    try {
+      const res = await axiosService.get("/auth/me");
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const context: AppProviderType = { user, setUser, Login };
+  const login = async () => {
+    await fetchMe();
+  };
 
-  return <AppContext.Provider value={context}>{children}</AppContext.Provider>;
-}
+  const logout = async () => {
+    await axiosService.post("/auth/logout");
+    setUser(null);
+  };
 
-export { AppProvider };
+  useEffect(() => {
+    fetchMe();
+  }, []);
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

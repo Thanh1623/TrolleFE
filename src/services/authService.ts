@@ -1,3 +1,4 @@
+import { LoginResponse } from "@/interfaces/auth";
 import { axiosService } from "./axios";
 // CREATE user
 const authService = {
@@ -13,6 +14,22 @@ const authService = {
       email,
       password,
     });
+    return response;
+  },
+
+  sendOTP: async (email: string) => {
+    const response = await axiosService.post("/auth/send-email", { email });
+    return response;
+  },
+
+  verifyOTP: async (email: string, otp: string) => {
+    const response = await axiosService.post<LoginResponse>(
+      "/auth/verify-otp",
+      {
+        email,
+        otp,
+      },
+    );
     return response;
   },
 };

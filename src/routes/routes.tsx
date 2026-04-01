@@ -5,6 +5,9 @@ import ErrorPage from "@/pages/error/error-page";
 import { ROUTES } from "./route-constants";
 import { RegisterPage } from "@/pages/auth/register";
 import AuthLayout from "@/layouts/auth-layout";
+import ProtectedRoute from "./protected-route";
+import HomeLayout from "@/layouts/home-layout";
+import HomePage from "@/pages/HomePage";
 
 export const router = createBrowserRouter([
   {
@@ -25,19 +28,19 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // {
-      //   element: (
-      //     <ProtectedRoute>
-      //       <DashboardLayout />
-      //     </ProtectedRoute>
-      //   ),
-      //   children: [
-      //     {
-      //       path: "/",
-      //       element: <DashboardPage />,
-      //     },
-      //   ],
-      // },
+      {
+        element: (
+          <ProtectedRoute>
+            <HomeLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            path: "/",
+            element: <HomePage />,
+          },
+        ],
+      },
     ],
   },
 ]);

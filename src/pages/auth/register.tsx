@@ -78,36 +78,6 @@ export function RegisterPage() {
               required
             />
           </div>
-
-          <div className="space-y-1">
-            <Label>Password</Label>
-            <Input
-              type="password"
-              name="password"
-              placeholder="Enter a password"
-              value={formData.password}
-              onChange={handleChange}
-              className="h-10"
-              required
-            />
-            <p className="text-xs text-muted-foreground">
-              At least 8 characters
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <Label>Confirm password</Label>
-            <Input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="h-10"
-              required
-            />
-          </div>
-
           {/* Terms */}
           <div className="flex items-start gap-2">
             <Checkbox
@@ -116,7 +86,7 @@ export function RegisterPage() {
               onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
             />
 
-            <span className="text-sm font-normal cursor-pointer">
+            <span className="text-xs font-normal cursor-pointer">
               I agree to the{" "}
               <Link to="#" className="text-[#0C66E4] hover:underline">
                 Terms of Service

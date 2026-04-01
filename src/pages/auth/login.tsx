@@ -2,31 +2,38 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROUTES } from "@/routes/route-constants";
+import { useSendOtp } from "@/modules/verifyOTP";
 import { HelpCircle } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import DialogOtp from "./DialogOtp";
+
+type Step = "email" | "otp";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoginPage, setIsLoginPage] = useState(true);
   const [error, setError] = useState("");
+  const [step, setStep] = useState<Step>("email");
 
-  function handleSubmit(e: React.FormEvent) {
+  const { mutateAsync: sendOtpMutation } = useSendOtp();
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!email) {
       setError("Enter your email");
       return;
     }
+    if (step === "email") {
+      try {
+        await sendOtpMutation({ email });
+        setStep("otp");
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+      }
+    }
 
     setError("");
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      alert("Login success (demo)");
-    }, 1500);
   }
 
   return (
@@ -43,9 +50,15 @@ function LoginPage() {
           <h1 className="text-xl font-semibold"></h1>
         </div>
 
-        <h2 className="text-center text-lg font-semibold">
-          Log in to continue
-        </h2>
+        {isLoginPage ? (
+          <h2 className="text-center text-lg font-semibold">
+            Log in to continue
+          </h2>
+        ) : (
+          <h2 className="text-center text-lg font-semibold">
+            Create an account
+          </h2>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
@@ -61,24 +74,21 @@ function LoginPage() {
             {error && <p className="text-xs text-red-500">{error}</p>}
           </div>
 
-          <div className="flex items-center gap-2">
-            <Checkbox id="remember" />
+          {isLoginPage && (
+            <div className="flex items-center gap-2">
+              <Checkbox id="remember" />
 
-            <Label
-              htmlFor="remember"
-              className="flex items-center gap-1 text-sm font-normal"
-            >
-              Remember me
-              <HelpCircle className="h-4 w-4 text-muted-foreground" />
-            </Label>
-          </div>
+              <Label
+                htmlFor="remember"
+                className="flex items-center gap-1 text-sm font-normal"
+              >
+                Remember me
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+              </Label>
+            </div>
+          )}
 
-          <Button
-            disabled={loading}
-            className="w-full h-10 bg-[#0C66E4] hover:bg-[#0055CC] text-white"
-          >
-            {loading ? "Continuing..." : "Continue"}
-          </Button>
+          <Button className="w-full h-10 bg-[#0C66E4] hover:bg-[#0055CC] text-white"></Button>
         </form>
 
         <div className="text-center text-sm text-muted-foreground">
@@ -91,6 +101,9 @@ function LoginPage() {
           <Button
             variant="outline"
             className="w-full h-10 font-normal flex gap-2"
+            onClick={() => {
+              window.location.href = "http://localhost:3000/auth/google";
+            }}
           >
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -133,17 +146,31 @@ function LoginPage() {
           </Button>
         </div>
 
-        <div className="text-center text-sm space-x-2">
-          <Link to="#" className="text-[#0C66E4] hover:underline">
-            Can't log in?
-          </Link>
+        {isLoginPage ? (
+          <div className="text-center text-sm space-x-2">
+            <span className="text-muted-foreground"> Can't log in? •</span>
 
-          <span className="text-muted-foreground">•</span>
+            <span
+              onClick={() => setIsLoginPage(false)}
+              className="text-[#0C66E4] hover:underline cursor-pointer font-medium"
+            >
+              Create an account
+            </span>
+          </div>
+        ) : (
+          <div className="text-center text-sm space-x-2">
+            <span className="text-muted-foreground">
+              Already have an account?
+            </span>
 
-          <Link to={ROUTES.REGISTER} className="text-[#0C66E4] hover:underline">
-            Create an account
-          </Link>
-        </div>
+            <span
+              onClick={() => setIsLoginPage(true)}
+              className="text-[#0C66E4] hover:underline cursor-pointer font-medium"
+            >
+              Log in
+            </span>
+          </div>
+        )}
 
         <div className="text-center pt-4 border-t border-border space-y-2">
           <p className="text-xs font-semibold tracking-widest text-muted-foreground">
@@ -155,6 +182,8 @@ function LoginPage() {
           </p>
         </div>
       </div>
+
+      <DialogOtp step={step} setStep={setStep} email={email} />
     </div>
   );
 }

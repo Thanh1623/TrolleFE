@@ -5,35 +5,52 @@ export const axiosService = axios.create({
   withCredentials: true,
 });
 
-// Add a request interceptor
-axiosService.interceptors.request.use(
-  function (config) {
-    const token = localStorage.getItem("access_token");
+let isRefreshing = false;
+let queue = [];
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  function (error) {
-    return Promise.reject(error);
-  },
-);
+const processQueue = (error) => {
+  queue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve();
+  });
+  queue = [];
+};
 
 // Add a response interceptor
 axiosService.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // gọi API refresh token ở đây
-      // rồi retry request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          queue.push({
+            resolve: () => resolve(axiosService(originalRequest)),
+            reject,
+          });
+        });
+      }
 
-      return await axiosService(originalRequest);
+      isRefreshing = true;
+
+      try {
+        await axiosService.post("/auth/refresh");
+
+        processQueue(null);
+
+        // retry request cũ
+        return axiosService(originalRequest);
+      } catch (err) {
+        processQueue(err);
+
+        window.location.href = "/login";
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     return Promise.reject(error);
