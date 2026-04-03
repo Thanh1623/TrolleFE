@@ -33,9 +33,9 @@ export default function DialogOtp({
           otp: value,
         });
         if (response.data.accessToken && response.data.refreshToken) {
+          await login();
           setStep("email");
           navigate("/");
-          await login();
         }
       } catch (error) {
         console.error("Error verifying OTP:", error);
